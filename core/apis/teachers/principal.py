@@ -5,7 +5,7 @@ from core.apis.responses import APIResponse
 from core.models.teachers import Teacher
 
 from .schema import TeachersSchema
-principal_assignments_resources = Blueprint('principal_assignments_resources', _name_)
+principal_assignments_resources = Blueprint('principal_assignments_resources', __name__)
 
 @principal_assignments_resources.route('/teachers', methods=['GET'], strict_slashes=False)
 @decorators.authenticate_principal

@@ -1,3 +1,6 @@
+from core.models.assignments import AssignmentStateEnum
+from flask import json
+
 def test_get_assignments_teacher_1(client, h_teacher_1):
     response = client.get(
         '/teacher/assignments',
@@ -12,6 +15,14 @@ def test_get_assignments_teacher_1(client, h_teacher_1):
 
 
 def test_get_assignments_teacher_2(client, h_teacher_2):
+    response = client.post(
+        '/teacher/assignments/grade',
+        headers=h_teacher_2,
+        json={
+            "id": 1,
+            "grade": "A"
+        }
+    )
     response = client.get(
         '/teacher/assignments',
         headers=h_teacher_2
@@ -76,7 +87,7 @@ def test_grade_assignment_bad_assignment(client, h_teacher_1):
         }
     )
 
-    assert response.status_code == 404
+    assert response.status_code == 400
     data = response.json
 
     assert data['error'] == 'FyleError'

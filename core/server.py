@@ -5,6 +5,8 @@ from core.apis.assignments import student_assignments_resources, teacher_assignm
 from core.libs import helpers
 from core.libs.exceptions import FyleError
 from werkzeug.exceptions import HTTPException
+from core.apis.assignments.principal import principal_assignments_resources
+
 
 from sqlalchemy.exc import IntegrityError
 

@@ -1,3 +1,4 @@
+from core.models.assignments import AssignmentStateEnum
 def test_get_assignments_student_1(client, h_student_1):
     response = client.get(
         '/student/assignments',
@@ -35,7 +36,7 @@ def test_post_assignment_null_content(client, h_student_1):
         json={
             'content': None
         })
-
+    print("MERRY CHRISTMAS",response)
     assert response.status_code == 400
 
 

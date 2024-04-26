@@ -5,6 +5,7 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlite3 import Connection as SQLite3Connection
 
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./store.sqlite3'
 app.config['SQLALCHEMY_ECHO'] = False
@@ -21,3 +22,5 @@ def _set_sqlite_pragma(dbapi_connection, connection_record):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON;")
         cursor.close()
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5002)

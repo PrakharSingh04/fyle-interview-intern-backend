@@ -5,6 +5,7 @@ from core.libs import helpers, assertions
 from core.models.teachers import Teacher
 from core.models.students import Student
 from sqlalchemy.types import Enum as BaseEnum
+from sqlalchemy import and_
 
 
 class GradeEnum(str, enum.Enum):
@@ -65,7 +66,7 @@ class Assignment(db.Model):
         assertions.assert_found(assignment, 'No assignment with this id was found')
         assertions.assert_valid(assignment.student_id == auth_principal.student_id, 'This assignment belongs to some other student')
         assertions.assert_valid(assignment.content is not None, 'assignment with empty content cannot be submitted')
-
+        assignment.state = AssignmentStateEnum.SUBMITTED
         assignment.teacher_id = teacher_id
         db.session.flush()
 
@@ -89,8 +90,8 @@ class Assignment(db.Model):
         return cls.filter(cls.student_id == student_id).all()
 
     @classmethod
-    def get_assignments_by_teacher(cls):
-        return cls.query.all()
+    def get_assignments_by_teacher_id(cls, teacher_id):
+        return cls.filter(cls.teacher_id == teacher_id).all()
     @classmethod
     def get_graded_and_submitted_assignments_by_student(cls, student_id):
-        return cls.filter(cls.student_id == student_id and (cls.grade == AssignmentStateEnum.GRADED or cls.grade == AssignmentStateEnum.SUBMITTED )).all()
+        return cls.filter(and_(cls.student_id == student_id, (cls.grade == AssignmentStateEnum.GRADED) | (cls.grade == AssignmentStateEnum.SUBMITTED ))).all()
