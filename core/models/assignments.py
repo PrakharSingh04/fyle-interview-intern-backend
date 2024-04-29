@@ -6,6 +6,7 @@ from core.models.teachers import Teacher
 from core.models.students import Student
 from sqlalchemy.types import Enum as BaseEnum
 from sqlalchemy import and_
+from datetime import datetime
 
 
 class GradeEnum(str, enum.Enum):
@@ -74,11 +75,11 @@ class Assignment(db.Model):
 
 
     @classmethod
-    def mark_grade(cls, _id, grade, auth_principal: AuthPrincipal):
+    def mark_grade(cls, _id, grade, teacher_id, auth_principal: AuthPrincipal):
         assignment = Assignment.get_by_id(_id)
         assertions.assert_found(assignment, 'No assignment with this id was found')
         assertions.assert_valid(grade is not None, 'assignment with empty grade cannot be graded')
-
+        assignment.teacher_id = teacher_id
         assignment.grade = grade
         assignment.state = AssignmentStateEnum.GRADED
         db.session.flush()
@@ -91,7 +92,7 @@ class Assignment(db.Model):
 
     @classmethod
     def get_assignments_by_teacher_id(cls, teacher_id):
-        return cls.filter(cls.teacher_id == teacher_id).all()
+        return cls.filter(cls.teacher_id == teacher_id,(cls.grade == AssignmentStateEnum.GRADED) | (cls.grade == AssignmentStateEnum.SUBMITTED )).all()
     @classmethod
     def get_graded_and_submitted_assignments_by_student(cls, student_id):
         return cls.filter(and_(cls.student_id == student_id, (cls.grade == AssignmentStateEnum.GRADED) | (cls.grade == AssignmentStateEnum.SUBMITTED ))).all()

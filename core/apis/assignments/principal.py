@@ -1,8 +1,10 @@
-from flask import Blueprint
+from flask import Blueprint,make_response,jsonify
 from core import db
 from core.apis import decorators
 from core.apis.responses import APIResponse
 from core.models.assignments import Assignment,AssignmentStateEnum
+from datetime import datetime
+
 
 from .schema import AssignmentSchema, AssignmentGradeSchema
 principal_assignments_resources = Blueprint('principal_assignments_resources', __name__)
@@ -21,16 +23,16 @@ def list_assignments(p):
 @decorators.authenticate_principal
 def grade_assignment(p, incoming_payload):
     """Grade an assignment"""
-    grade_assignment_payload = AssignmentSchema().load(incoming_payload)
-    ##assignment = Assignment.get_by_id(grade_assignment_payload.id)
-   ## if assignment is None:
-     ##   return jsonify({'error': 'FyleError', 'message': 'Assignment does not exist'}), 400
-    
-   ## if assignment.state == AssignmentStateEnum.DRAFT:
-     ##   return jsonify({'error': 'FyleError', 'message': 'Cannot grade a draft assignment'}), 400
+    grade_assignment_payload = incoming_payload
+    assignment = Assignment.query.filter_by(id=grade_assignment_payload['id']).first()
+    assignment_dump = AssignmentSchema().dump(assignment)
+    print(assignment_dump, "aaaaa")
+    if assignment.state == AssignmentStateEnum.DRAFT.value or assignment_dump['teacher_id'] is None:
+        return make_response(jsonify({'error': 'FyleError', 'message': 'draft assignment can be submitted'}),400)
     graded_assignment = Assignment.mark_grade(
-        _id=grade_assignment_payload.id,
-        grade=grade_assignment_payload.grade,
+        _id=assignment.id,
+        grade=incoming_payload['grade'],
+        teacher_id=assignment.teacher_id,
         auth_principal=p
         )
     db.session.commit()
